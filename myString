@@ -1,0 +1,144 @@
+#include <iostream>
+
+class myString
+{
+    public:
+    static const size_t npos = -1;
+
+    myString(const char *chr)
+    {
+        size = Length(chr);
+        ptr = new char[size+1];
+        int i=0;
+        for(;i<size;++i)
+        {
+            ptr[i] = chr[i];
+        }
+        ptr[i] = '\0';
+    }
+
+    myString(const size_t l):
+    size(l)
+    {
+        ptr = new char[size];
+    }
+
+    myString(const myString &r):
+    size{r.size}
+    {
+        ptr = new char[size];
+        for(int i=0;i<size;++i)
+        {
+            ptr[i] = r.ptr[i];
+        }
+    }
+
+    size_t find(const myString &str)
+    {
+        size_t res = npos;
+        size_t instr = 0;
+        for(int i=0;i<str.length();++i)
+        {
+            if ((*this)[i] == str[instr])
+            {
+                if (res == npos)
+                    res = i;
+
+                ++instr;
+                if (instr >= str.length())
+                {
+                    break;
+                }
+            }
+            else
+            {
+                res = npos;
+                instr = 0;
+            }
+        }
+        return res;
+    }
+
+    myString substr(size_t i, size_t len)
+    {
+        myString str(len+1);
+        size_t in=i;
+        for(;in<len+i;++in)
+        {
+            str[in] = (*this)[in];
+        }
+        str[in] = '\0';
+
+        return str;
+    }
+
+    myString substr(size_t i)
+    {
+        size_t len = length();
+        myString str(len + 1);
+        size_t in=i;
+        size_t index = 0;
+        for(;in<len;++in)
+        {
+            str[index] = (*this)[in];
+            ++index;
+        }
+        str[index] = '\0';
+
+        return str;
+    }
+
+    char& operator [](size_t i)
+    {
+        return ptr[i];
+    }
+
+    char& operator [](size_t i) const
+    {
+        return ptr[i];
+    }
+
+    size_t length() const
+    {
+        return size;
+    }
+
+    void printVal()
+    {
+        std::cout << ptr << std::endl;
+    }
+
+    friend std::ostream& operator<<(std::ostream& os, const myString& dt);
+    private:
+    size_t Length(const char *p)
+    {
+        size_t count = 0;
+        while(p[count] != '\0')
+        {
+            ++count;
+        }
+        
+        return count;
+    }
+    char *ptr;
+    size_t size;
+};
+
+std::ostream& operator<<(std::ostream& os, const myString& dt)
+{
+    os << dt.ptr << std::endl;
+    return os;
+}
+
+int main()
+{
+    myString m("Selamdan");
+    size_t pos = m.find("lam");
+
+    if (pos != myString::npos)
+    {
+        myString str = m.substr(pos);
+        std::cout << str;
+    }
+    return 0; 
+}
