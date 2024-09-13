@@ -1,14 +1,17 @@
 #include <iostream>
+#include <memory>
 
 class myString
 {
     public:
     static const size_t npos = -1;
 
+    myString() = default;
+
     myString(const char *chr)
     {
         size = Length(chr);
-        ptr = new char[size+1];
+        ptr = std::make_unique<char[]>(size+1);
         int i=0;
         for(;i<size;++i)
         {
@@ -20,19 +23,65 @@ class myString
     myString(const size_t l):
     size(l)
     {
-        ptr = new char[size];
+        ptr = std::make_unique<char[]>(size);
     }
 
     myString(const myString &r):
     size{r.size}
     {
-        ptr = new char[size];
+        ptr = std::make_unique<char[]>(size);
         for(int i=0;i<size;++i)
         {
             ptr[i] = r.ptr[i];
         }
     }
 
+    myString& operator = (myString &r)
+    {
+        if (this != &r)
+        {
+            if (size != r.size)
+            {
+                size = r.size;
+                ptr = std::make_unique<char[]>(size+1);
+            }
+
+            size_t i=0;
+            for(;i<size;++i)
+            {
+                ptr[i] = r.ptr[i];
+            }
+            ptr[i] = '\0';
+        }
+        return *this;
+    }
+
+    myString(myString &&r):
+    size{r.size}
+    {
+        ptr = std::make_unique<char[]>(size);
+
+        ptr = std::move(r.ptr);
+        r.ptr = nullptr;
+        r.size = 0;
+    }
+
+    myString& operator = (myString &&r)
+    {
+        if (this != &r)
+        {
+            size = r.size;
+            ptr = std::move(r.ptr);;
+            r.ptr = nullptr;
+            r.size = 0;
+        }
+        return *this;
+    }
+
+    ~myString()
+    {
+    }
+    
     size_t find(const myString &str)
     {
         size_t res = npos;
@@ -103,12 +152,8 @@ class myString
         return size;
     }
 
-    void printVal()
-    {
-        std::cout << ptr << std::endl;
-    }
-
     friend std::ostream& operator<<(std::ostream& os, const myString& dt);
+
     private:
     size_t Length(const char *p)
     {
@@ -120,13 +165,13 @@ class myString
         
         return count;
     }
-    char *ptr;
+    std::unique_ptr<char[]> ptr;
     size_t size;
 };
 
 std::ostream& operator<<(std::ostream& os, const myString& dt)
 {
-    os << dt.ptr << std::endl;
+    os << dt.ptr.get() << std::endl;
     return os;
 }
 
