@@ -23,17 +23,19 @@ class myString
     myString(const size_t l):
     size(l)
     {
-        ptr = std::make_unique<char[]>(size);
+        ptr = std::make_unique<char[]>(size+1);
     }
 
     myString(const myString &r):
     size{r.size}
     {
-        ptr = std::make_unique<char[]>(size);
-        for(int i=0;i<size;++i)
+        ptr = std::make_unique<char[]>(size+1);
+		int i=0;
+        for(;i<size;++i)
         {
             ptr[i] = r.ptr[i];
         }
+		ptr[i] = '\0';
     }
 
     myString& operator = (myString &r)
@@ -59,8 +61,6 @@ class myString
     myString(myString &&r):
     size{r.size}
     {
-        ptr = std::make_unique<char[]>(size);
-
         ptr = std::move(r.ptr);
         r.ptr = nullptr;
         r.size = 0;
@@ -71,7 +71,7 @@ class myString
         if (this != &r)
         {
             size = r.size;
-            ptr = std::move(r.ptr);;
+            ptr = std::move(r.ptr);
             r.ptr = nullptr;
             r.size = 0;
         }
@@ -150,6 +150,65 @@ class myString
     size_t length() const
     {
         return size;
+    }
+
+    myString operator + (myString &rhs)
+    {
+        myString res(rhs.length()+ length());
+        size_t i=0;
+
+         for(;i<length();++i)
+        {
+            res.ptr[i] = ptr[i];
+        }
+
+        for(size_t j = 0;j<rhs.length();++j)
+        {
+            res.ptr[i] = rhs.ptr[j];
+            ++i;
+        }
+
+        res.ptr[i] = '\0';
+
+        return res;
+    }
+
+    myString& operator += (myString &rhs)
+    {
+        std::unique_ptr<char[]> p = std::make_unique<char[]>(length() + rhs.length() +1);
+        size_t i = 0;
+        for(;i<length();++i)
+        {
+            p[i] = ptr[i];
+        }
+
+        for(size_t j = 0; j < rhs.length();++j)
+        {
+            p[i] = rhs.ptr[j];
+            ++i;
+        }
+        p[i] = '\0';
+        size = length() + rhs.length();
+        ptr = std::move(p);
+        return *this;
+    }
+
+    bool operator == (const myString &rhs)
+    {
+        if (size != rhs.size)
+        {
+            return false;
+        }
+
+        for(size_t i=0;i<size;++i)
+        {
+            if (ptr[i] != rhs.ptr[i])
+            {
+                return false;
+            }
+        }
+
+        return true;
     }
 
     friend std::ostream& operator<<(std::ostream& os, const myString& dt);
